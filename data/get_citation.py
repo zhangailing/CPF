@@ -10,14 +10,17 @@ from networkx.readwrite import json_graph
 import pdb
 sys.setrecursionlimit(99999)
 
+# 提供了一些工具函数和数据加载函数，主要用于处理图数据集，特别是用于加载和预处理引用网络数据集（如Cora、Citeseer等）
 
+
+# 计算预测结果的准确率
 def accuracy(output, labels):
     preds = output.max(1)[1].type_as(labels)
     correct = preds.eq(labels).double()
     correct = correct.sum()
     return correct / len(labels)
 
-
+# 对稀疏矩阵进行行归一化，使每行的元素和为1
 def normalize(mx):
     """Row-normalize sparse matrix"""
     rowsum = np.array(mx.sum(1))
@@ -28,7 +31,7 @@ def normalize(mx):
     mx = r_mat_inv.dot(mx)
     return mx
 
-
+# 计算对称归一化的邻接矩阵
 def sys_normalized_adjacency(adj):
     adj = sp.coo_matrix(adj)
     adj = adj + sp.eye(adj.shape[0])
@@ -39,7 +42,7 @@ def sys_normalized_adjacency(adj):
     d_mat_inv_sqrt = sp.diags(d_inv_sqrt)
     return d_mat_inv_sqrt.dot(adj).dot(d_mat_inv_sqrt).tocoo()
 
-
+# 将稀疏矩阵转换为PyTorch稀疏张量
 def sparse_mx_to_torch_sparse_tensor(sparse_mx):
     """Convert a scipy sparse matrix to a torch sparse tensor."""
     sparse_mx = sparse_mx.tocoo().astype(np.float32)
@@ -49,7 +52,7 @@ def sparse_mx_to_torch_sparse_tensor(sparse_mx):
     shape = torch.Size(sparse_mx.shape)
     return torch.sparse.FloatTensor(indices, values, shape)
 
-
+# 解析索引文件，读取文件中的索引值
 def parse_index_file(filename):
     """Parse index file."""
     index = []
@@ -57,7 +60,7 @@ def parse_index_file(filename):
         index.append(int(line.strip()))
     return index
 
-
+# 加载引用网络数据集（如Cora、Citeseer等），并进行预处理
 def load_citation(dataset_str="cora", device=0):
     """
     Load Citation Networks Datasets.

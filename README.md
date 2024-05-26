@@ -29,7 +29,7 @@ The official code of WWW2021 paper: Extract the Knowledge of Graph Neural Networ
 - Python version >= 3.6
 - PyTorch version >= 1.7.1
 - DGL
-- Optuna (optional)
+- Optuna (optional) 自动调参
 
 ## Usage
 

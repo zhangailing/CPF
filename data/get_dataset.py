@@ -5,12 +5,14 @@ import numpy as np
 
 from data.make_dataset import get_dataset_and_split_planetoid, get_dataset, get_train_val_test_split
 
+# 为了在实验中灵活地加载和分割数据集，并为后续的模型训练和验证提供必要的数据支持
 
+# 加载实验配置
 def get_experiment_config(config_path):
     with open(config_path, 'r') as conf:
         return yaml.load(conf, Loader=yaml.FullLoader)
 
-
+# 生成数据文件的路径
 def generate_data_path(dataset, dataset_source):
     if dataset_source == 'planetoid':
         return 'data/planetoid'
@@ -20,7 +22,7 @@ def generate_data_path(dataset, dataset_source):
         print(dataset_source)
         raise ValueError(f'The "dataset_source" must be set to "planetoid" or "npz"')
 
-
+# 加载数据集并分割
 def load_dataset_and_split(labelrate, dataset):
     # _config = get_experiment_config(config_file)
     _config = {

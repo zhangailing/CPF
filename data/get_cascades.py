@@ -4,7 +4,7 @@ import numpy as np
 import os
 # from pathlib import Path
 
-
+# 从指定目录加载级联文件并将其转换为PyTorch张量
 def load_cascades(cascade_dir, device, trans=False, final=False):
     cas = []
     if final:
@@ -23,7 +23,7 @@ def load_cascades(cascade_dir, device, trans=False, final=False):
     cas = cas.to(device)
     return cas
 
-
+# 删除级联目录中最近的几个级联文件，以防止过拟合。
 def remove_overfitting_cascades(cascade_dir, patience):
     cas_list = os.listdir(cascade_dir)
     cas_list.sort(key=lambda x: int(x[:-4]))

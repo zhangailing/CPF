@@ -8,7 +8,9 @@ from distill_dgl import model_train, choose_model, distill_test
 from data.get_cascades import load_cascades
 from data.utils import load_tensor_data, initialize_label, set_random_seed, choose_path
 
+# 自动化超参数调优和实验运行的框架
 
+# 这个类用于执行自动化机器学习实验，主要功能包括初始化实验配置、定义目标函数、运行优化过程，并返回最佳结果。通过 Optuna 库进行超参数搜索，以最大化验证集准确率为目标。
 class AutoML(object):
     """
     Args:
@@ -28,6 +30,7 @@ class AutoML(object):
         self.labels = None
         self.output = None
 
+    #  AutoML 类的目标函数，通过调用 func_search 获取超参数组合，运行实验并评估验证集的准确率。如果当前结果优于之前的最佳结果，则更新最佳结果。
     def _objective(self, trials):
         params = self.default_params
         params.update(self.func_search(trials))
@@ -35,7 +38,7 @@ class AutoML(object):
         if self.best_results is None or results['ValAcc'] > self.best_results['ValAcc']:
             self.best_results = results
         return results['ValAcc']
-
+    # 该方法创建一个 Optuna 研究对象，进行超参数优化，并返回最佳结果及相关预测、标签和输出。
     def run(self):
         study = optuna.create_study(direction="maximize")
         study.optimize(self._objective, n_trials=self.n_trials, n_jobs=self.n_jobs)
@@ -43,7 +46,7 @@ class AutoML(object):
         return self.best_results, self.preds, self.labels, self.output
         # return self.best_value, self.model
 
-
+# 这个函数执行单次实验，包括设置输出路径、随机种子、加载数据、初始化模型和优化器、训练模型和测试模型，最终返回结果及相关信息。
 def raw_experiment(configs):
     output_dir, cascade_dir = choose_path(configs)
     # random seed

@@ -635,7 +635,7 @@ predefined_configs = {
     }
 }
 
-
+# 解析命令行参数
 def arg_parse(parser):
     parser.add_argument('--dataset', type=str, default='cora', help='Dataset')
     parser.add_argument('--teacher', type=str, default='GCN', help='Teacher Model')
@@ -652,7 +652,7 @@ def arg_parse(parser):
     parser.add_argument('--njobs', type=int, default=10, help='Number of jobs')
     return parser.parse_args()
 
-
+# 根据解析的参数设置配置项
 def set_configs(configs):
     configs = dict(configs, **predefined_configs[args.ptype][args.teacher][args.dataset])
     training_configs_path = Path.cwd().joinpath('models', 'train.conf.yaml')
@@ -664,7 +664,7 @@ def set_configs(configs):
     configs['division_seed'] = get_experiment_config(data_configs_path)['seed']
     return configs
 
-
+# 使用超参数优化工具（如Optuna）来定义要搜索的超参数空间，并返回一个包含超参数值的字典
 def func_search(trial):
     return {
         "num_layers": trial.suggest_int("num_layers", 5, 10),
@@ -675,20 +675,20 @@ def func_search(trial):
         "weight_decay": trial.suggest_categorical("weight_decay", [5e-4, 1e-3, 1e-2]),
     }
 
-
+# 生成实验的不同变体，基于数据集、模型名称和随机种子。这一步用于创建不同实验配置的组合
 def gen_variants(**items):
     Variant = namedtuple("Variant", items.keys())
     print()
     return itertools.starmap(Variant, itertools.product(*items.values()))
 
-
+# 生成多个参数变体（variants）的迭代器，每个变体对应一个不同的实验配置。
 def variant_args_generator(args, variants):
     """Form variants as group with size of num_workers"""
     for variant in variants:
         args.dataset, args.model, args.seed = variant
         yield copy.deepcopy(args)
 
-
+# 这一行的作用是确保以下代码块只有在脚本被直接运行时才会执行，而在模块被导入时不会执行。
 if __name__ == '__main__':
     # load_configs
     args = arg_parse(argparse.ArgumentParser())
@@ -700,6 +700,7 @@ if __name__ == '__main__':
                                  seed=[configs['seed']]))
     print(variants)
     results_dict = defaultdict(list)
+    # 选择使用 AutoML 或原始实验
     for variant in variants:
         if args.automl:
             tool = AutoML(kwargs=configs, func_search=func_search)

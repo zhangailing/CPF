@@ -3,7 +3,9 @@ import numpy as np
 import itertools
 from tabulate import tabulate
 
+# 用于日志记录和格式化输出实验结果
 
+# 创建一个日志记录器，用于记录程序运行过程中的日志信息。
 def get_logger(filename, verbosity=1, name=None):
     level_dict = {0: logging.DEBUG, 1: logging.INFO, 2: logging.WARNING}
     formatter = logging.Formatter(
@@ -22,7 +24,7 @@ def get_logger(filename, verbosity=1, name=None):
 
     return logger
 
-
+# 将实验结果字典转换为带有平均值和标准差的表格数据。
 def tabulate_results(results_dict):
     # Average for different seeds
     tab_data = []
@@ -43,7 +45,7 @@ def tabulate_results(results_dict):
         )
     return tab_data
 
-
+# 输出格式化的实验结果表格
 def output_results(results_dict, tablefmt="github"):
     variant = list(results_dict.keys())[0]
     col_names = ["Variant"] + list(results_dict[variant][-1].keys())

@@ -4,7 +4,9 @@ import scipy.sparse as sp
 
 from data.preprocess import eliminate_self_loops as eliminate_self_loops_adj, largest_connected_components
 
+# 主要功能是处理稀疏图数据，提供加载、保存、标准化等操作
 
+# 该类用于存储带有属性和标签的图数据，采用稀疏矩阵形式。
 class SparseGraph:
     """Attributed labeled graph stored in sparse matrix form.
 
@@ -136,12 +138,12 @@ class SparseGraph:
         """Return the (A, X, z) triplet."""
         return self.adj_matrix, self.attr_matrix, self.labels
 
-
+# 用于消除图中的自环。
 def eliminate_self_loops(G):
     G.adj_matrix = eliminate_self_loops_adj(G.adj_matrix)
     return G
 
-
+# 根据数据路径加载数据集
 def load_dataset(data_path):
     """Load a dataset.
 
@@ -164,7 +166,7 @@ def load_dataset(data_path):
     else:
         raise ValueError(f"{data_path} doesn't exist.")
 
-
+# 从 Numpy 二进制文件加载稀疏图，并返回一个 SparseGraph 对象
 def load_npz_to_sparse_graph(file_name):
     """Load a SparseGraph from a Numpy binary file.
 
@@ -211,7 +213,7 @@ def load_npz_to_sparse_graph(file_name):
 
     return SparseGraph(adj_matrix, attr_matrix, labels, node_names, attr_names, class_names, metadata)
 
-
+# 将 SparseGraph 对象保存为 Numpy 二进制文件
 def save_sparse_graph_to_npz(filepath, sparse_graph):
     """Save a SparseGraph to a Numpy binary file.
 

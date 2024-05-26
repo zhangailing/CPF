@@ -12,12 +12,14 @@ from data.io_dataset import load_dataset
 from data.preprocess import to_binary_bag_of_words, remove_underrepresented_classes, \
     eliminate_self_loops, binarize_labels
 
+# 用于加载和预处理图数据集，主要包括获取数据集、生成训练/验证/测试数据集的划分、以及处理和标准化图结构
 
+# 检查特征矩阵是否为二值词袋模型
 def is_binary_bag_of_words(features):
     features_coo = features.tocoo()
     return all(single_entry == 1.0 for _, _, single_entry in zip(features_coo.row, features_coo.col, features_coo.data))
 
-
+# 加载并预处理指定的数据集，包括标准化处理、消除自环、移除样本数不足的类别、转换特征为二值词袋模型、以及检查特征和邻接矩阵的有效性
 def get_dataset(name, data_path, standardize, train_examples_per_class=None, val_examples_per_class=None):
     # if _log is not None:
     #     _log.info(f'Loading dataset {name}.')
@@ -57,7 +59,7 @@ def get_dataset(name, data_path, standardize, train_examples_per_class=None, val
 
     return graph_adj, node_features, labels
 
-
+# 根据指定的训练、验证和测试样本数（或每类样本数）生成训练、验证和测试数据集的索引。确保划分后的数据集中没有重复的样本，并且不同数据集之间互斥
 def get_train_val_test_split(random_state,
                              labels,
                              train_examples_per_class=None, val_examples_per_class=None,
@@ -120,7 +122,7 @@ def get_train_val_test_split(random_state,
 
     return train_indices, val_indices, test_indices
 
-
+# 从每个类别中随机抽取指定数量的样本，返回这些样本的索引。用于生成训练、验证和测试数据集的索引
 def sample_per_class(random_state, labels, num_examples_per_class, forbidden_indices=None):
     num_samples, num_classes = labels.shape
     sample_indices_per_class = {index: [] for index in range(num_classes)}
@@ -138,7 +140,7 @@ def sample_per_class(random_state, labels, num_examples_per_class, forbidden_ind
          for class_index in range(len(sample_indices_per_class))
          ])
 
-
+# 为训练、验证和测试数据集生成 TensorFlow 的 feed 字典
 def get_split_feed_dicts(train_indices, val_indices, test_indices):
     dataset_indices_placeholder = tf.placeholder(tf.int32, shape=[None], name='dataset_indices_placeholder')
 
@@ -149,7 +151,7 @@ def get_split_feed_dicts(train_indices, val_indices, test_indices):
 
     return dataset_indices_placeholder, train_feed, trainval_feed, val_feed, test_feed
 
-
+# 加载 Planetoid 数据集（如 Citeseer、Cora 和 Pubmed），并生成训练、验证和测试数据集的划分
 def get_dataset_and_split_planetoid(dataset, data_path):
     def parse_index_file(filename):
         """Parse index file."""

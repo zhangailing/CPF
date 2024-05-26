@@ -1,7 +1,9 @@
 import yaml
 import torch
 
+# 获取训练配置并检查设备设置
 
+# 读取指定路径的配置文件，获取全局和特定模型的配置参数
 def get_training_config(config_path, model_name):
     with open(config_path, 'r') as conf:
         full_config = yaml.load(conf, Loader=yaml.FullLoader)
@@ -9,7 +11,7 @@ def get_training_config(config_path, model_name):
     specific_config['model_name'] = model_name
     return specific_config
 
-
+# 根据配置参数确定模型训练时使用的设备（CPU或GPU），并设置随机种子以保证实验的可重复性
 def check_device(conf):
     # os.environ['CUDA_VISIBLE_DEVICES'] = str(conf['device'])
     if conf['model_name'] in ['DeepWalk', 'GraphSAGE']:

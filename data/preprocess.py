@@ -5,7 +5,9 @@ from collections import Counter
 
 from sklearn.preprocessing import MultiLabelBinarizer, LabelBinarizer, normalize
 
+# 涉及一些图数据处理的功能，包括邻接矩阵的归一化、去除自环、获取最大的连通分量、标签二值化等，为后续的图神经网络训练和评估做准备
 
+# 将 TF/IDF 特征转换为二值词袋特征，即将特征矩阵中的所有非零值设为 1
 def to_binary_bag_of_words(features):
     """Converts TF/IDF features to binary bag-of-words features."""
     features_copy = features.tocsr()
@@ -33,12 +35,12 @@ def renormalize_adj(A):
     D_sqrt = np.sqrt(D)
     return A / D_sqrt[:, None] / D_sqrt[None, :]
 
-
+# 对矩阵进行行归一化
 def row_normalize(matrix):
     """Normalize the matrix so that the rows sum up to 1."""
     return normalize(matrix, norm='l1', axis=1)
 
-
+# 向邻接矩阵添加自环
 def add_self_loops(A, value=1.0):
     """Set the diagonal."""
     A = A.tolil()  # make sure we work on a copy of the original matrix
@@ -48,7 +50,7 @@ def add_self_loops(A, value=1.0):
         A.eliminate_zeros()
     return A
 
-
+# 去除邻接矩阵中的自环
 def eliminate_self_loops(A):
     """Remove self-loops from the adjacency matrix."""
     A = A.tolil()
@@ -57,7 +59,7 @@ def eliminate_self_loops(A):
     A.eliminate_zeros()
     return A
 
-
+# 创建包含指定节点子集的子图
 def largest_connected_components(sparse_graph, n_components=1):
     """Select the largest connected components in the graph.
 
@@ -82,7 +84,7 @@ def largest_connected_components(sparse_graph, n_components=1):
     ]
     return create_subgraph(sparse_graph, nodes_to_keep=nodes_to_keep)
 
-
+# 将标签向量转换为二值标签矩阵
 def create_subgraph(sparse_graph, _sentinel=None, nodes_to_remove=None, nodes_to_keep=None):
     """Create a graph with the specified subset of nodes.
 
@@ -130,7 +132,7 @@ def create_subgraph(sparse_graph, _sentinel=None, nodes_to_remove=None, nodes_to
         sparse_graph.node_names = sparse_graph.node_names[nodes_to_keep]
     return sparse_graph
 
-
+# 移除样本数不足的类别的节点
 def binarize_labels(labels, sparse_output=False, return_classes=False):
     """Convert labels vector to a binary label matrix.
 

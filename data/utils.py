@@ -6,7 +6,9 @@ import time
 from pathlib import Path
 from data.get_dataset import load_dataset_and_split
 
+# 用于数据处理、图数据加载和预处理的函数，以及一些实用函数
 
+# 对稀疏矩阵进行行归一化，使每行的元素和为1
 def normalize(mx):
     """Row-normalize sparse matrix"""
     rowsum = np.array(mx.sum(1))
@@ -16,38 +18,38 @@ def normalize(mx):
     mx = r_mat_inv.dot(mx)
     return mx
 
-
+# 对邻接矩阵进行归一化处理，并加上单位矩阵
 def normalize_adj(adj):
     adj = normalize(adj + sp.eye(adj.shape[0]))
     return adj
 
-
+# 对特征矩阵进行归一化处理
 def normalize_features(features):
     features = normalize(features)
     return features
 
-
+# 初始化标签矩阵，对于训练集使用真实标签，对于其他数据点使用均匀分布
 def initialize_label(idx_train, labels_one_hot):
     labels_init = torch.ones_like(labels_one_hot) / len(labels_one_hot[0])
     labels_init[idx_train] = labels_one_hot[idx_train]
     return labels_init
 
-
+# 将测试集索引划分为两部分，返回两个子集
 def split_double_test(dataset, idx_test):
     test_num = len(idx_test)
     idx_test1 = idx_test[:int(test_num/2)]
     idx_test2 = idx_test[int(test_num/2):]
     return idx_test1, idx_test2
 
-
+# 预处理邻接矩阵（归一化）
 def preprocess_adj(model_name, adj):
     return normalize_adj(adj)
 
-
+# 预处理特征矩阵（在这个实现中直接返回原特征）
 def preprocess_features(model_name, features):
     return features
 
-
+# 加载 Open Graph Benchmark (OGB) 数据集，并返回图数据、特征、标签以及训练、验证和测试集索引
 def load_ogb_data(dataset, device):
     from ogb.nodeproppred import DglNodePropPredDataset
     data = DglNodePropPredDataset(name="ogbn-"+dataset, root='data')
@@ -67,7 +69,7 @@ def load_ogb_data(dataset, device):
     idx_test = idx_test.to(device)
     return graph, features, labels, idx_train, idx_val, idx_test
 
-
+# 加载数据集并将其转换为 PyTorch 张量，同时进行预处理
 def load_tensor_data(model_name, dataset, labelrate, device):
     if dataset in ['composite', 'composite2', 'composite3']:
         adj, features, labels_one_hot, idx_train, idx_val, idx_test = load_composite_data(dataset)
@@ -98,7 +100,7 @@ def load_tensor_data(model_name, dataset, labelrate, device):
 
     return adj, adj_sp, features, labels, labels_one_hot, idx_train, idx_val, idx_test
 
-
+# 加载复合数据集，包括邻接矩阵、特征、标签以及训练、验证和测试集索引
 def load_composite_data(dataset):
     base_dir = Path.cwd().joinpath('data', dataset)
     adj = np.loadtxt(str(base_dir.joinpath('adj')))
@@ -115,7 +117,7 @@ def load_composite_data(dataset):
 
     return adj, features, labels_one_hot, idx_train, idx_val, idx_test
 
-
+# 将邻接矩阵转换为字典表示，其中键是节点索引，值是与该节点相连的节点集合
 def table_to_dict(adj):
     adj = adj.cpu().numpy()
     # print(adj)
@@ -125,7 +127,7 @@ def table_to_dict(adj):
         adj_list[i] = set(np.argwhere(adj[i] > 0).ravel())
     return adj_list
 
-
+# 计算两个稀疏矩阵的幂积
 def matrix_pow(m1, n, m2):
     t = time.time()
     m1 = sp.csr_matrix(m1)
@@ -137,7 +139,7 @@ def matrix_pow(m1, n, m2):
     print(time.time() - t)
     return ans
 
-
+# 使用快速幂算法计算矩阵的幂
 def quick_matrix_pow(m, n):
     t = time.time()
     E = torch.eye(len(m))
@@ -149,18 +151,18 @@ def quick_matrix_pow(m, n):
     print(time.time() - t)
     return E
 
-
+# 对矩阵进行行归一化处理，使每行的元素和为1
 def row_normalize(data):
     return (data.t() / torch.sum(data.t(), dim=0)).t()
 
-
+# 对 NumPy 矩阵进行行归一化处理，使每行的元素和为1
 def np_normalize(matrix):
     from sklearn.preprocessing import normalize
     """Normalize the matrix so that the rows sum up to 1."""
     matrix[np.isnan(matrix)] = 0
     return normalize(matrix, norm='l1', axis=1)
 
-
+# 检查目录是否可写，如果不存在则创建，如果存在且允许覆盖则删除后重新创建
 def check_writable(dir, overwrite=True):
     import shutil
     if not os.path.exists(dir):
@@ -171,20 +173,20 @@ def check_writable(dir, overwrite=True):
     else:
         pass
 
-
+# 检查目录或文件是否存在，如果不存在则抛出错误
 def check_readable(dir):
     if not os.path.exists(dir):
         print(dir)
         raise ValueError(f'No such a directory or file!')
 
-
+# 设置随机种子以保证实验的可重复性
 def set_random_seed(seed):
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
 
-
+# 根据配置文件选择输出路径和级联路径，并检查路径是否可写或可读
 def choose_path(conf):
     if 'assistant' not in conf.keys():
         teacher_str = conf['teacher']

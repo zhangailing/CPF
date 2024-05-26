@@ -1,3 +1,5 @@
+# 设置图数据集的加载和处理参数
+
 dataset_source:
   'npz'
 #  'planetoid'

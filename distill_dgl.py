@@ -22,7 +22,9 @@ from models.MLP import MLP
 
 from utils.metrics import accuracy, my_loss
 
+# 定义了一个完整的图神经网络（GNN）训练、蒸馏和测试框架，包括超参数搜索和结果保存功能。
 
+# 命令行参数解析
 def arg_parse(parser):
     parser.add_argument('--dataset', type=str, default='cora', help='Dataset')
     parser.add_argument('--teacher', type=str, default='GCN', help='Teacher Model')
@@ -50,7 +52,7 @@ def arg_parse(parser):
 
     return parser.parse_args()
 
-
+# 模型选择
 def choose_model(conf, G, features, labels, byte_idx_train, labels_one_hot):
     if conf['model_name'] == 'GCN':
         model = GCN(
@@ -125,7 +127,7 @@ def choose_model(conf, G, features, labels, byte_idx_train, labels_one_hot):
         raise ValueError(f'Undefined Model.')
     return model
 
-
+# 执行单个 epoch 的训练，并计算损失和准确率；
 def distill_train(all_logits, dur, epoch, model, optimizer, conf, G, labels_init, labels, idx_no_train, idx_train,
                   idx_val, idx_test, cas):
     t0 = time.time()
@@ -167,7 +169,7 @@ def distill_train(all_logits, dur, epoch, model, optimizer, conf, G, labels_init
         epoch, loss.item(), loss_val.item(), acc_train.item(), acc_val.item(), acc_test.item(), dur[-1]))
     return acc_val, loss_val
 
-
+# 调用 distill_train 多次，进行完整的训练过程，包含早停机制
 def model_train(conf, model, optimizer, G, labels_init,
                 labels, idx_no_train, idx_train, idx_val, idx_test, cas):
     all_logits = []
@@ -195,7 +197,7 @@ def model_train(conf, model, optimizer, G, labels_init,
     print("Total time elapsed: {:.4f}s".format(np.sum(dur)))
     return best
 
-
+# 在测试集上评估模型的性能，计算测试损失、准确率以及教师模型与学生模型的预测一致性
 def distill_test(conf, model, G, labels_init, labels, idx_test, cas):
     model.eval()
     if conf['model_name'] in ['GCN', 'APPNP', 'LogReg', 'MLP']:
@@ -220,7 +222,7 @@ def distill_test(conf, model, G, labels_init, labels, idx_test, cas):
 
     return acc_test, logp, same_predict
 
-
+# 将实验结果（如预测结果、标签、输出概率、测试准确率等）保存到指定目录，还包括一些特定模型的中间结果，如注意力权重和特征梯度。
 def save_output(output_dir, preds, labels, output, acc_test, same_predict, G, idx_train, adj, conf):
     np.savetxt(output_dir.joinpath('preds.txt'), preds, fmt='%d', delimiter='\t')
     np.savetxt(output_dir.joinpath('labels.txt'), labels, fmt='%d', delimiter='\t')

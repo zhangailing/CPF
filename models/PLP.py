@@ -10,7 +10,9 @@ from dgl.ops import edge_softmax
 # from dgl.nn.pytorch import GATConv
 from dgl.nn import DotGatConv
 
+# 用于图神经网络的模型和相关的层，具体包括PLP模型、PLP卷积层、DotGAT卷积层以及多层感知机（MLP）模型
 
+# 这是一个基于图神经网络的模型类，用于对图数据进行节点分类
 class PLP(nn.Module):
     def __init__(self, g, num_layers, in_dim, emb_dim, num_classes, activation,
                  feat_drop, attn_drop, residual, byte_idx_train, labels_one_hot, ptype, mlp_layers):
@@ -38,7 +40,7 @@ class PLP(nn.Module):
         logits = th.mul(h, ~self.masked) + self.masked_labels_one_hot
         return logits, att, alpha, el, er
 
-
+# 这是PLP模型中的卷积层类，定义了PLP层的计算过程。
 class PLPConv(nn.Module):
     def __init__(self,
                  in_feats,
@@ -164,7 +166,7 @@ class PLPConv(nn.Module):
             return rst, att, th.sigmoid(self.lr_alpha).squeeze(), el.squeeze(), er.squeeze()
             # return rst, att, self.lr_alpha.squeeze()
 
-
+# 这是一个基于点积注意力的图卷积层类。
 class DotGatConv(nn.Module):
     def __init__(self,
                  in_feats,
@@ -220,7 +222,7 @@ class DotGatConv(nn.Module):
 
         return rst, att, th.sigmoid(self.lr_alpha).squeeze()
 
-
+# 这是一个简单的多层感知机（MLP）模型类。
 class MLP(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, dropout):
         super(MLP, self).__init__()
@@ -234,7 +236,7 @@ class MLP(nn.Module):
         return self.lr2(self.dropout(tmp1))
         # return self.lr3(self.dropout(x))
 
-
+# 这是一个扩展的多层感知机（MLP）模型类，支持多层的情况。
 class MLP2(nn.Module):
     def __init__(self, num_layers, input_dim, hidden_dim, output_dim, dropout):
         super(MLP2, self).__init__()
